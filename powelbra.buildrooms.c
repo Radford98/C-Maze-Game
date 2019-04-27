@@ -27,7 +27,7 @@ void AddRandomConnection(struct room[]);
 struct room GetRandomRoom(struct room[]);
 int CanAddConnectionFrom(struct room);
 int ConnectionAlreadyExists(struct room, struct room);
-void ConnectRoom(struct room, struct room);
+void ConnectRooms(struct room*, struct room*);
 int IsSameRoom(struct room, struct room);
 void RandomizeRooms(char**);
 
@@ -135,8 +135,7 @@ void AddRandomConnection(struct room rooms[]) {
 	} while(CanAddConnectionFrom(B) == 0 || IsSameRoom(A, B) == 1
 		|| ConnectionAlreadyExists(A, B) == 1);
 
-	ConnectRoom(A, B);	// TODO: Add this connection to the real variables,
-	ConnectRoom(B, A);	// because this A and B will be destroyed when the function terminates
+	ConnectRooms(&A, &B);	// TODO: Add this connection to the real variables, because A and B will be destroyed
 }
 
 // Returns a random Room, but does NOT validate if connection can be added
@@ -163,9 +162,16 @@ int ConnectionAlreadyExists(struct room x, struct room y) {
 	return 0;
 }
 
-// Connects Rooms x and y together, does not check if this connection is valid
-void ConnectRoom(struct room x, struct room y) {
+// Connects Rooms x and y together, does not check if this connection is valid.
+void ConnectRooms(struct room *x, struct room *y) {
+	// Since the struct's current number of connections is the same as the next place
+	// for a connection, use that to connect the two rooms.
+	x->outConn[x->numOutConn] = y;
+	x->numOutConn++;	// Increment connection counter
 
+	// Connect the other room
+	y->outConn[y->numOutConn] = x;
+	y->numOutConn++;
 }
 
 // Returns 1 (true) if Rooms x and y are the same room, 0 (false) otherwise
