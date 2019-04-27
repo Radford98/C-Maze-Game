@@ -19,11 +19,10 @@ struct room {
 	int numOutConn;	// Counter to keep track of connections to other rooms
 	struct room* outConn[6];	// Array of pointers to other rooms.
 	int roomType;	// 0 for start, 1 for mid, 2 for end
-	int ready;	// Set to 1 after the room has 3 connections
 };
 
 // Function prototypes
-int IsGraphFull();
+int IsGraphFull(struct room[]);
 void AddRandomConnection();
 struct room GetRandomRoom();
 int CanAddConnectionFrom(struct room);
@@ -64,11 +63,16 @@ int main() {
 			rooms[i].outConn[j] = NULL;
 		}
 		rooms[i].roomType = 1;	// Set initial room type to mid
-		rooms[i].ready = 0;	// No connections, so not ready
 	}
 	// Set start and end rooms.
 	rooms[0].roomType = 0;
 	rooms[6].roomType = 2;
+
+	// Create all connections in the graph. The loop checks if the graph is full, and
+	// if it isn't, add a new connection between rooms.
+	while (IsGraphFull(rooms) == 0) {
+		//AddRandomConnection();
+	}
 
 
 	return 0;
@@ -97,17 +101,18 @@ void RandomizeRooms(char** array) {
 }
 
 
-// Create all connections in the graph. The loop checks if the graph is full, and
-// if it isn't, add a new connection between rooms.
-/*
-while (IsGraphFull() == 0) {
-	AddRandomConnection();
-}
-*/
 // Returns 1 (true) if all rooms have 3-6 outbound connections, 0 (false) otherwise
-int IsGraphFull()
-{
-
+// Loops through each room. Once one room is found to have less than 3 connections, return 
+// false. If the loop completes, each room has at least 3 connections (other functions
+// safeguard the max) and the graph is complete (return true).
+int IsGraphFull(struct room rooms[]) {
+	int i;
+	for (i = 0; i < 7; i++) {
+		if (rooms[i].numOutConn < 3) {
+			return 0;
+		}
+	}
+	return 1;	
 }
 
 // Adds a random, valid outbound connection from a Room to another Room
