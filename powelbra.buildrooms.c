@@ -52,6 +52,24 @@ int main() {
 	// Randomize the room names for assignment.
 	RandomizeRooms(roomNames);
 
+	// Create room struct array and initialize them.
+	struct room rooms[7];
+	int i;
+	for (i = 0; i < 7; i++) {
+		rooms[i].id = i;
+		rooms[i].name = roomNames[i+3];	// i+3 because selected names are at end of arrray
+		rooms[i].numOutConn = 0;
+		int j;
+		for (j = 0; j < 6; j++) {
+			rooms[i].outConn[j] = NULL;
+		}
+		rooms[i].roomType = 1;	// Set initial room type to mid
+		rooms[i].ready = 0;	// No connections, so not ready
+	}
+	// Set start and end rooms.
+	rooms[0].roomType = 0;
+	rooms[6].roomType = 2;
+
 
 	return 0;
 }
