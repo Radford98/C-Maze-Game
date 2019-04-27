@@ -23,8 +23,8 @@ struct room {
 
 // Function prototypes
 int IsGraphFull(struct room[]);
-void AddRandomConnection();
-struct room GetRandomRoom();
+void AddRandomConnection(struct room[]);
+struct room GetRandomRoom(struct room[]);
 int CanAddConnectionFrom(struct room);
 int ConnectionAlreadyExists(struct room, struct room);
 void ConnectRoom(struct room, struct room);
@@ -71,7 +71,7 @@ int main() {
 	// Create all connections in the graph. The loop checks if the graph is full, and
 	// if it isn't, add a new connection between rooms.
 	while (IsGraphFull(rooms) == 0) {
-		//AddRandomConnection();
+		//AddRandomConnection(rooms);
 	}
 
 
@@ -116,12 +116,12 @@ int IsGraphFull(struct room rooms[]) {
 }
 
 // Adds a random, valid outbound connection from a Room to another Room
-void AddRandomConnection() {
+void AddRandomConnection(struct room rooms[]) {
 	struct room A;	// Maybe a struct, maybe global array of ints
 	struct room B;
 
 	while(1) {	// Keep this loop running until a valid room is selected
-		A = GetRandomRoom();
+		A = GetRandomRoom(rooms);
 
 		if (CanAddConnectionFrom(A) == 1)
 			break;
@@ -129,7 +129,7 @@ void AddRandomConnection() {
 
 	// Set B to a random room and check if it's valid (not full, different from A, and it's a new connection)
 	do {
-		B = GetRandomRoom();
+		B = GetRandomRoom(rooms);
 	} while(CanAddConnectionFrom(B) == 0 || IsSameRoom(A, B) == 1
 		|| ConnectionAlreadyExists(A, B) == 1);
 
@@ -138,13 +138,14 @@ void AddRandomConnection() {
 }
 
 // Returns a random Room, but does NOT validate if connection can be added
-struct room GetRandomRoom() {
-
+struct room GetRandomRoom(struct room rooms[]) {
+	int random = rand % 8;	// Selects a room from 0-7
+	return rooms[random];
 }
 
 // Returns 1 (true) if a connection can be added from Room x (<6 outbound connections), 0 (false) otherwise
 int CanAddConnectionFrom(struct room x) {
-
+	return (x.numOutConn < 6);
 }
 
 // Returns 1 (true) if a connection from Room x to Room y already exists, 0 (false) otherwise
