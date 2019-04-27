@@ -70,12 +70,33 @@ int main() {
 
 	// Create all connections in the graph. The loop checks if the graph is full, and
 	// if it isn't, add a new connection between rooms.
-/*	
 	while (IsGraphFull(rooms) == 0) {
-		//AddRandomConnection(rooms);
+		AddRandomConnection(rooms);
 	}
-*/
-	
+
+	printf("Here come the rooms...\n");
+	for (i = 0; i < 7; i++){
+		printf("Name: %s\nID: %d\nNum Connections: %d\n", rooms[i].name, rooms[i].id, rooms[i].numOutConn);
+		int j;
+		for (j=0; j < rooms[i].numOutConn; j++) {
+			printf("Connection %d: %s\n", j+1, rooms[i].outConn[j]->name);
+		}
+		printf("Room type: ");
+		switch(rooms[i].roomType){
+			case 0 :
+				printf("Start\n");
+				break;
+			case 1 :
+				printf("Mid\n");
+				break;
+			case 2 :
+				printf("End\n");
+				break;
+			default :
+				printf("Error!\n");
+		}
+		printf("-------------\n");
+	}	
 
 	return 0;
 }
@@ -135,7 +156,7 @@ void AddRandomConnection(struct room rooms[]) {
 	} while(CanAddConnectionFrom(B) == 0 || IsSameRoom(A, B) == 1
 		|| ConnectionAlreadyExists(A, B) == 1);
 
-	ConnectRooms(&A, &B);	// TODO: Add this connection to the real variables, because A and B will be destroyed
+	ConnectRooms(&rooms[A.id], &rooms[B.id]);	// Since each room's id matches its place in the array, it can be used to select the same rooms from the rooms array.
 }
 
 // Returns a random Room, but does NOT validate if connection can be added
