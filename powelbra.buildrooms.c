@@ -70,8 +70,40 @@ int main() {
 
 	// Create all connections in the graph. The loop checks if the graph is full, and
 	// if it isn't, add a new connection between rooms.
+	/*
 	while (IsGraphFull(rooms) == 0) {
 		//AddRandomConnection(rooms);
+	}
+*/
+	struct room test = GetRandomRoom(rooms);
+	printf("Your random room: %s\n", test.name);
+
+	if (CanAddConnectionFrom(test) == 1) {
+		printf("You can add a connection\n");
+	}
+	else {
+		printf("The horror! Connections filled! %d\n", test.numOutConn);
+	}
+	test.numOutConn=6;
+	if (CanAddConnectionFrom(test) == 1) {
+		printf(" The horror! Connections not filled!\n");
+	} else {
+		printf("Connections filled properly\n");
+	}
+	test.numOutConn=0;
+
+	struct room another = GetRandomRoom(rooms);
+	if (ConnectionAlreadyExists(test, another) == 0) {
+		printf("No previous connection\n");
+	} else {
+		printf("How is there a connection?\n");
+	}
+	test.numOutConn = 1;
+	test.outConn[0] = &another;
+	if (ConnectionAlreadyExists(test, another) == 0) {
+		printf("How isn't there a connection?\n");
+	} else {
+		printf("Connected!\n");
 	}
 
 
@@ -117,7 +149,7 @@ int IsGraphFull(struct room rooms[]) {
 
 // Adds a random, valid outbound connection from a Room to another Room
 void AddRandomConnection(struct room rooms[]) {
-	struct room A;	// Maybe a struct, maybe global array of ints
+	struct room A;	
 	struct room B;
 
 	while(1) {	// Keep this loop running until a valid room is selected
@@ -139,7 +171,7 @@ void AddRandomConnection(struct room rooms[]) {
 
 // Returns a random Room, but does NOT validate if connection can be added
 struct room GetRandomRoom(struct room rooms[]) {
-	int random = rand % 8;	// Selects a room from 0-7
+	int random = rand() % 7;	// Selects a room from 0-6
 	return rooms[random];
 }
 
@@ -150,7 +182,15 @@ int CanAddConnectionFrom(struct room x) {
 
 // Returns 1 (true) if a connection from Room x to Room y already exists, 0 (false) otherwise
 int ConnectionAlreadyExists(struct room x, struct room y) {
-
+	int i;	// variable for loop
+	// Check if any of x's connections match y.
+	for (i = 0; i < x.numOutConn; i++) {
+		if (x.outConn[i]->id == y.id) {
+			return 1;
+		}
+	}
+	// If the loop ends, a connection does not exist.
+	return 0;
 }
 
 // Connects Rooms x and y together, does not check if this connection is valid
