@@ -70,42 +70,12 @@ int main() {
 
 	// Create all connections in the graph. The loop checks if the graph is full, and
 	// if it isn't, add a new connection between rooms.
-	/*
+/*	
 	while (IsGraphFull(rooms) == 0) {
 		//AddRandomConnection(rooms);
 	}
 */
-	struct room test = GetRandomRoom(rooms);
-	printf("Your random room: %s\n", test.name);
-
-	if (CanAddConnectionFrom(test) == 1) {
-		printf("You can add a connection\n");
-	}
-	else {
-		printf("The horror! Connections filled! %d\n", test.numOutConn);
-	}
-	test.numOutConn=6;
-	if (CanAddConnectionFrom(test) == 1) {
-		printf(" The horror! Connections not filled!\n");
-	} else {
-		printf("Connections filled properly\n");
-	}
-	test.numOutConn=0;
-
-	struct room another = GetRandomRoom(rooms);
-	if (ConnectionAlreadyExists(test, another) == 0) {
-		printf("No previous connection\n");
-	} else {
-		printf("How is there a connection?\n");
-	}
-	test.numOutConn = 1;
-	test.outConn[0] = &another;
-	if (ConnectionAlreadyExists(test, another) == 0) {
-		printf("How isn't there a connection?\n");
-	} else {
-		printf("Connected!\n");
-	}
-
+	
 
 	return 0;
 }
@@ -200,5 +170,5 @@ void ConnectRoom(struct room x, struct room y) {
 
 // Returns 1 (true) if Rooms x and y are the same room, 0 (false) otherwise
 int IsSameRoom(struct room x, struct room y) {
-
+	return (x.id == y.id);
 }
