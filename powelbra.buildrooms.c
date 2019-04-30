@@ -30,6 +30,7 @@ int ConnectionAlreadyExists(struct room, struct room);
 void ConnectRooms(struct room*, struct room*);
 int IsSameRoom(struct room, struct room);
 void RandomizeRooms(char**);
+void CreateFiles(struct room[]);
 
 int main() {
 	// Create a random seed based on the time
@@ -74,42 +75,8 @@ int main() {
 		AddRandomConnection(rooms);
 	}
 
-	// Create directory for room files
-	char dirName[30];
-	memset(dirName, '\0', strlen(dirName));
-	sprintf(dirName, "powelbra.rooms.%d", getpid());	// Store the name of the dir
-	int result = mkdir(dirName, 0755);
-
-	// Create the room files
-	for (i = 0; i < 7; i++) {
-		// First, build a file name for fopen. For example, powelbra.rooms.7653/Armory
-		char fileName[50];
-		memset(fileName, '\0', strlen(fileName));
-		sprintf(fileName, "%s/%s", dirName, rooms[i].name);
-		FILE* fp = fopen(fileName, "w");	// Create and open file
-
-		// Write the appropriate data to the file.
-		fprintf(fp, "ROOM NAME: %s\n", rooms[i].name);
-		int j;
-		for (j = 0; j < rooms[i].numOutConn; j++) {
-			fprintf(fp, "CONNECTION %d: %s\n", j+1, rooms[i].outConn[j]->name);
-		}
-		fprintf(fp, "ROOM TYPE: ");
-		// Convert the numerical start room to the appropriate word.
-		switch(rooms[i].roomType) {
-			case 0 :
-				fprintf(fp, "START_ROOM\n");
-				break;
-			case 1 :
-				fprintf(fp, "MID_ROOM\n");
-				break;
-			case 2 :
-				fprintf(fp, "END_ROOM\n");
-				break;
-		}
-
-	}
-
+	// Create the directory and the files in it
+	CreateFiles(rooms);
 
 	return 0;
 }
@@ -211,4 +178,43 @@ void ConnectRooms(struct room *x, struct room *y) {
 // Returns 1 (true) if Rooms x and y are the same room, 0 (false) otherwise
 int IsSameRoom(struct room x, struct room y) {
 	return (x.id == y.id);
+}
+
+void CreateFiles(struct room rooms[]) {
+
+	// Create directory for room files
+	char dirName[30];
+	memset(dirName, '\0', strlen(dirName));
+	sprintf(dirName, "powelbra.rooms.%d", getpid());	// Store the name of the dir
+	int result = mkdir(dirName, 0755);
+
+	// Create the room files
+	int i;
+	for (i = 0; i < 7; i++) {
+		// First, build a file name for fopen. For example, powelbra.rooms.7653/Armory
+		char fileName[50];
+		memset(fileName, '\0', strlen(fileName));
+		sprintf(fileName, "%s/%s", dirName, rooms[i].name);
+		FILE* fp = fopen(fileName, "w");	// Create and open file
+
+		// Write the appropriate data to the file.
+		fprintf(fp, "ROOM NAME: %s\n", rooms[i].name);
+		int j;
+		for (j = 0; j < rooms[i].numOutConn; j++) {
+			fprintf(fp, "CONNECTION %d: %s\n", j+1, rooms[i].outConn[j]->name);
+		}
+		fprintf(fp, "ROOM TYPE: ");
+		// Convert the numerical start room to the appropriate word.
+		switch(rooms[i].roomType) {
+			case 0 :
+				fprintf(fp, "START_ROOM\n");
+				break;
+			case 1 :
+				fprintf(fp, "MID_ROOM\n");
+				break;
+			case 2 :
+				fprintf(fp, "END_ROOM\n");
+				break;
+		}
+	}
 }
