@@ -170,6 +170,7 @@ void RunAdventure(struct room rooms[], struct room* curRoom) {
 
 		// Get the next room from the user
 		getline(&input, &inputSize, stdin);
+		input[strlen(input)-1] = 0;	// Change newline to null terminator
 		printf("\n");
 
 		// Check if the line entered maps to a valid room connection
@@ -197,12 +198,13 @@ void RunAdventure(struct room rooms[], struct room* curRoom) {
 		}
 
 		// Check if the game is over
+		if (strcmp(curRoom->roomType, "END_ROOM") == 0) {
+			gameEnd = 0;	// Set variable to break while loop
+			path[strlen(path)-1] = 0;	// Replace final newline with null terminator
+			printf("YOU HAVE FOUND THE END ROOM. CONGRATULATIONS!\n");
+			printf("YOU TOOK %d STEPS. YOU PATH TO VICTORY WAS:\n%s\n", steps, path);
+		}
 
-
-
-
-
-	}
-	// Game won stuff goes here
+	} // End while loop
 
 }
