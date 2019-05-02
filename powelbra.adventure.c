@@ -26,15 +26,35 @@ struct room {
 
 };
 
+void TestRooms(struct room[]);
 void CreateRooms(struct room[]);
-
+void RunAdventure(struct room[], struct room*);
 
 int main() {
+	int i;	// Index variable for loops.
+
 	// Create an array of structs for holding the rooms
 	struct room rooms[7];
 	// Find the newest directory and create the rooms
 	CreateRooms(rooms);
+	
+	// Room pointer to keep track of which room the player is in.
+	struct room* curRoom;
+	// Set the player's position to the start room
+	for (i = 0; i < 7; i++) {
+		if (strcmp(rooms[i].roomType, "START_ROOM") == 0) {
+			curRoom = &rooms[i];
+			break;	// No need to continue searching once the room is found
+		}
+	}
 
+	RunAdventure(rooms, curRoom);
+	
+	return 0;
+}
+
+// This function accepts an array of 7 rooms and prints out their variables.
+void TestRooms(struct room rooms[]) {
 	int i;
 	for (i = 0; i<7; i++) {
 		printf("Room %d: %s\n", rooms[i].id+1, rooms[i].name);
@@ -45,8 +65,6 @@ int main() {
 		}
 		printf("Room type: %s\n", rooms[i].roomType);
 	}
-
-	return 0;
 }
 
 // Function which accepts an array of 7 room structs. It finds the newest directory with a given prefix
@@ -122,21 +140,69 @@ void CreateRooms(struct room rooms[]) {
 				fscanf(roomFile, "%*s %s", fileLine);	// skip "type" and save name
 				strcpy(rooms[roomID].roomType, fileLine);
 				roomID++;	// Increment room counter
+				fclose(roomFile);
 			}
 		}
 	}
 	
-
+	closedir(dirToCheck);	
 
 }
 
+// Function to run the game. After creating some variables to help track things, runs a loop until
+// the game is won. It prints some navigation for the user, waits for a new room to move to,
+// checks if that room is valid, and moves if it is. Once the END_ROOM has been found, the game
+// will end and the player's stats will be reported to them.
+void RunAdventure(struct room rooms[], struct room* curRoom) {
+	int i;		// Index variable
+	int invalid;	// Variable for error checking
+	int steps = 0;	// Count the nuumber of steps needed.
+	char path[256];	// Path to victory
+	memset(path, '\0', sizeof(path));
+	char* input = NULL;	// Variables for getline
+	size_t inputSize = 0;
+	int gameEnd = 1; // Used by the loop to keep going until the game is won
+
+	while (gameEnd) {
+		// Report location
+		printf("CURRENT LOCATION: %s\nPOSSIBLE CONNECTIONS: %s\nWHERE TO? >",
+			curRoom->name, curRoom->connList);
+
+		// Get the next room from the user
+		getline(&input, &inputSize, stdin);
+		printf("\n");
+
+		// Check if the line entered maps to a valid room connection
+		invalid = 1;
+		for (i = 0; i < curRoom->numOutConn; i++) {
+			if (strcmp(input, curRoom->outConn[i]) == 0) {	// If the names match
+				int j;
+				for (j = 0; j < 7; j++) {
+					if (strcmp(input, rooms[j].name) == 0) { // Find the right room
+						curRoom = &rooms[j];	// Switch to the new room
+						break;
+					}
+				}
+				invalid = 0;			// Let the program know the room was valid
+				steps++;			// Increment step counter
+				strcat(path, curRoom->name);	// Add the name to the path
+				strcat(path, "\n");		// Add a newline
+				break;	// Stop the loop from checking more than necessary
+			}
+		}
+
+		// Print an error message if the provided name didn't match a room exactly.
+		if (invalid == 1) {
+			printf("HUH? I DON'T UNDERSTAND THAT ROOM. TRY AGAIN.\n\n");
+		}
+
+		// Check if the game is over
 
 
 
 
 
+	}
+	// Game won stuff goes here
 
-
-
-
-
+}

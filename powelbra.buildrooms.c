@@ -193,7 +193,7 @@ void CreateFiles(struct room rooms[]) {
 	for (i = 0; i < 7; i++) {
 		// First, build a file name for fopen. For example, powelbra.rooms.7653/Armory
 		char fileName[50];
-		memset(fileName, '\0', strlen(fileName));
+		memset(fileName, '\0', sizeof(fileName));
 		sprintf(fileName, "%s/%s", dirName, rooms[i].name);
 		FILE* fp = fopen(fileName, "w");	// Create and open file
 
