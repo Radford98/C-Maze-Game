@@ -7,4 +7,4 @@ powelbra.adventure: powelbra.adventure.c
 	gcc -o powelbra.adventure powelbra.adventure.c -lpthread
 
 clean: 
-	rm -rf powelbra.adventure powelbra.buildrooms powelbra.rooms.*
+	rm -rf powelbra.adventure powelbra.buildrooms powelbra.rooms.* currentTime.txt

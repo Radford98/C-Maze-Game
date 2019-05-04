@@ -70,20 +70,6 @@ int main() {
 	return 0;
 }
 
-// This function accepts an array of 7 rooms and prints out their variables.
-void TestRooms(struct room rooms[]) {
-	int i;
-	for (i = 0; i<7; i++) {
-		printf("Room %d: %s\n", rooms[i].id+1, rooms[i].name);
-		printf("All connections: %s\n", rooms[i].connList);
-		int j;
-		for (j = 0; j < rooms[i].numOutConn; j++) {
-			printf("Connection %d: %s\n", j+1, rooms[i].outConn[j]);
-		}
-		printf("Room type: %s\n", rooms[i].roomType);
-	}
-}
-
 // Function which accepts an array of 7 room structs. It finds the newest directory with a given prefix
 // and pulls the files out of the directory to create room structs for the array.
 // Uses the code from 2.4 Manipulating Directories as a model.
@@ -243,12 +229,15 @@ void RunAdventure(struct room rooms[], struct room* curRoom, pthread_mutex_t* ti
 
 }
 
+// This function serves as the start point for the timekeeping thread. It uses a mutex to wait until
+// the main thread calls upon it, then it writes the current time to file.
 void* tellTime(void* arg) {
 	// Create a mutex pointer to hold the properly casted address.
 	pthread_mutex_t* timeMutex = (pthread_mutex_t *) arg;
 	pthread_mutex_lock(timeMutex);		// Wait for the user to call for the time
 	
 	FILE* textFile = fopen("currentTime.txt", "w");	// Creates/replaces a text file for the time
+	// Creates a formatted string for time and writes it to the file
 	char* format = "%l:%M%P, %A, %B %d, %Y";
 	char buff[50];
 	time_t t = time(NULL);
