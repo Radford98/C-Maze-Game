@@ -171,19 +171,21 @@ void CreateRooms(struct room rooms[]) {
 // checks if that room is valid, and moves if it is. Once the END_ROOM has been found, the game
 // will end and the player's stats will be reported to them.
 void RunAdventure(struct room rooms[], struct room* curRoom, pthread_mutex_t* timeMutex, pthread_t timeThread) {
-	int i;		// Index variable
-	int invalid;	// Variable for error checking
-	int steps = 0;	// Count the nuumber of steps needed.
-	char path[256];	// Path to victory
+	int i;			// Index variable
+	int invalid = 0;	// Variable for error checking
+	int steps = 0;		// Count the nuumber of steps needed.
+	char path[256];		// Path to victory
 	memset(path, '\0', sizeof(path));
 	char* input = NULL;	// Variables for getline
 	size_t inputSize = 0;
-	int gameEnd = 1; // Used by the loop to keep going until the game is won
+	int gameEnd = 1; 	// Used by the loop to keep going until the game is won
 
 	while (gameEnd) {
-		// Report location
-		printf("CURRENT LOCATION: %s\nPOSSIBLE CONNECTIONS: %s\nWHERE TO? >",
-			curRoom->name, curRoom->connList);
+		// Report location if the user didn't just ask for the time
+		if (invalid != 2) {
+			printf("CURRENT LOCATION: %s\nPOSSIBLE CONNECTIONS: %s\nWHERE TO? >",
+				curRoom->name, curRoom->connList);
+		}
 
 		// Get the next room from the user
 		getline(&input, &inputSize, stdin);
@@ -223,7 +225,7 @@ void RunAdventure(struct room rooms[], struct room* curRoom, pthread_mutex_t* ti
 			getline(&time, &len, inFile);
 			printf("%s\n\nWHERE TO? >", time);
 
-			invalid = 0;
+			invalid = 2;	// Skip error message and reprinting of room locations
 		}
 		// Print an error message if the provided name didn't match a room exactly.
 		if (invalid == 1) {
