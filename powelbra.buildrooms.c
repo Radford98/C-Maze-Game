@@ -216,5 +216,6 @@ void CreateFiles(struct room rooms[]) {
 				fprintf(fp, "END_ROOM\n");
 				break;
 		}
+		fclose(fp);
 	}
 }

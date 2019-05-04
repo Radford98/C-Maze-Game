@@ -15,6 +15,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <pthread.h>
+#include <assert.h>
 
 struct room {
 	int id;
@@ -28,7 +30,8 @@ struct room {
 
 void TestRooms(struct room[]);
 void CreateRooms(struct room[]);
-void RunAdventure(struct room[], struct room*);
+void RunAdventure(struct room[], struct room*, pthread_mutex_t*, pthread_t);
+void* tellTime(void*);
 
 int main() {
 	int i;	// Index variable for loops.
@@ -48,7 +51,21 @@ int main() {
 		}
 	}
 
-	RunAdventure(rooms, curRoom);
+	// Create and lock the mutex
+	pthread_mutex_t timeMutex = PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_lock(&timeMutex);
+
+	// Create the second thread for timekeeping
+	int resultInt;
+	pthread_t timeThread;
+	resultInt = pthread_create(&timeThread, NULL, tellTime, (void *) &timeMutex);
+	assert(resultInt == 0);
+
+	RunAdventure(rooms, curRoom, &timeMutex, timeThread);
+
+	// Kill the second thread
+	pthread_cancel(timeThread);
+	pthread_mutex_destroy(&timeMutex);
 	
 	return 0;
 }
@@ -153,7 +170,7 @@ void CreateRooms(struct room rooms[]) {
 // the game is won. It prints some navigation for the user, waits for a new room to move to,
 // checks if that room is valid, and moves if it is. Once the END_ROOM has been found, the game
 // will end and the player's stats will be reported to them.
-void RunAdventure(struct room rooms[], struct room* curRoom) {
+void RunAdventure(struct room rooms[], struct room* curRoom, pthread_mutex_t* timeMutex, pthread_t timeThread) {
 	int i;		// Index variable
 	int invalid;	// Variable for error checking
 	int steps = 0;	// Count the nuumber of steps needed.
@@ -192,6 +209,22 @@ void RunAdventure(struct room rooms[], struct room* curRoom) {
 			}
 		}
 
+		// Check if user asked for the time
+		if (strcmp(input, "time") == 0) {
+			pthread_mutex_unlock(timeMutex);	// Unlocks the mutex
+			pthread_join(timeThread, NULL);		// Waits for time to be printed
+			pthread_mutex_lock(timeMutex);		// Relocks the mutex
+			pthread_create(&timeThread, NULL, tellTime, (void*) timeMutex);	// Recreate thread
+
+			// Print time from file
+			FILE* inFile = fopen("currentTime.txt", "r");
+			char* time = NULL;
+			size_t len = 0;
+			getline(&time, &len, inFile);
+			printf("%s\n\nWHERE TO? >", time);
+
+			invalid = 0;
+		}
 		// Print an error message if the provided name didn't match a room exactly.
 		if (invalid == 1) {
 			printf("HUH? I DON'T UNDERSTAND THAT ROOM. TRY AGAIN.\n\n");
@@ -204,7 +237,26 @@ void RunAdventure(struct room rooms[], struct room* curRoom) {
 			printf("YOU HAVE FOUND THE END ROOM. CONGRATULATIONS!\n");
 			printf("YOU TOOK %d STEPS. YOU PATH TO VICTORY WAS:\n%s\n", steps, path);
 		}
-
 	} // End while loop
 
+}
+
+void* tellTime(void* arg) {
+	// Create a mutex pointer to hold the properly casted address.
+	pthread_mutex_t* timeMutex = (pthread_mutex_t *) arg;
+	pthread_mutex_lock(timeMutex);		// Wait for the user to call for the time
+	
+	FILE* textFile = fopen("currentTime.txt", "w");	// Creates/replaces a text file for the time
+	char* format = "%l:%M%P, %A, %B %d, %Y";
+	char buff[50];
+	time_t t = time(NULL);
+	struct tm *tmp = localtime(&t);
+
+	strftime(buff, sizeof(buff), format, tmp);	// Create the formatted time string in buff
+	fprintf(textFile, "%s", buff);		// Write to file
+
+	fclose(textFile);
+	pthread_mutex_unlock(timeMutex);	// Release the lock so the main thread can grab it
+
+	return NULL;
 }

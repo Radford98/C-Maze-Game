@@ -4,7 +4,7 @@ powelbra.buildrooms: powelbra.buildrooms.c
 	gcc -o powelbra.buildrooms powelbra.buildrooms.c
 
 powelbra.adventure: powelbra.adventure.c
-	gcc -o powelbra.adventure powelbra.adventure.c
+	gcc -o powelbra.adventure powelbra.adventure.c -lpthread
 
 clean: 
 	rm -rf powelbra.adventure powelbra.buildrooms powelbra.rooms.*
